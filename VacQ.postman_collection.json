@@ -11,8 +11,99 @@
       "name": "Hospitals",
       "item": [
         {
-          "name": "Create new Hospital",
+          "name": "Get All Hospitals",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "const  response = pm.response.json();\r",
+                  "\r",
+                  "console.log(response);\r",
+                  "\r",
+                  "pm.test(\"There are  some hospitals!!\", () => {\r",
+                  "    pm.expect(response.count).to.be.above(0);\r",
+                  "});\r",
+                  "\r",
+                  "pm.execution.setNextRequest(\"Create New Hospital\");"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
           "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": "JSON Type",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"BNH\",\r\n  \"address\": \"Changwattana Pakkret\",\r\n  \"district\": \"Pakkret\",\r\n  \"province\": \"Nonthaburi\",\r\n  \"postalcode\": \"10110\",\r\n  \"tel\": \"02-8369999\",\r\n  \"region\": \"กรุงเทพมหานคร (Bangkok)\"\r\n}\r\n"
+            },
+            "url": {
+              "raw": "{{URL}}/api/v1/hospitals",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "hospitals"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create New Hospital",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(201);\r",
+                  "});\r",
+                  "\r",
+                  "const response = pm.response.json();\r",
+                  "const new_hospital_id = response.data.id;\r",
+                  "\r",
+                  "pm.globals.set(\"globals_hospital_ID\", new_hospital_id);\r",
+                  "\r",
+                  "pm.execution.setNextRequest(\"Get Single Hospital\");\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
             "header": [
               {
@@ -24,7 +115,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"name\": \"BNH\",\r\n  \"address\": \"Changwattana Pakkret\",\r\n  \"district\": \"Pakkret\",\r\n  \"province\": \"Nonthaburi\",\r\n  \"postalcode\": \"10110\",\r\n  \"tel\": \"02-8369999\",\r\n  \"region\": \"กรุงเทพมหานคร (Bangkok)\"\r\n}\r\n",
+              "raw": "{\r\n  \"name\": \"{{$randomFullName}}  \",\r\n  \"address\": \"Changwattana Pakkret\",\r\n  \"district\": \"Pakkret\",\r\n  \"province\": \"กรุงเทพมหานคร\",\r\n  \"postalcode\": \"11110\",\r\n  \"tel\": \"02-8369999\",\r\n  \"region\": \"Bangkok\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -46,7 +137,24 @@
           "response": []
         },
         {
-          "name": "Get All Hospitals",
+          "name": "Get Single Hospital",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.execution.setNextRequest(\"Update Single Hospital\");"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
           "protocolProfileBehavior": {
             "disableBodyPruning": true
           },
@@ -64,6 +172,447 @@
               "mode": "raw",
               "raw": "{\r\n  \"name\": \"BNH\",\r\n  \"address\": \"Changwattana Pakkret\",\r\n  \"district\": \"Pakkret\",\r\n  \"province\": \"Nonthaburi\",\r\n  \"postalcode\": \"10110\",\r\n  \"tel\": \"02-8369999\",\r\n  \"region\": \"กรุงเทพมหานคร (Bangkok)\"\r\n}\r\n"
             },
+            "url": {
+              "raw": "{{URL}}/api/v1/hospitals/:hospital_ID",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "hospitals",
+                ":hospital_ID"
+              ],
+              "query": [
+                {
+                  "key": "select",
+                  "value": "name,provice,postalcode",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "povince",
+                  "value": "name = ABC",
+                  "type": "text",
+                  "disabled": true
+                }
+              ],
+              "variable": [
+                {
+                  "key": "hospital_ID",
+                  "value": "{{globals_hospital_ID}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Single Hospital",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.execution.setNextRequest(\"Delete Single Hospital\");\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": "JSON Type",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"{{$randomFullName}}\"\r\n}\r\n"
+            },
+            "url": {
+              "raw": "{{URL}}/api/v1/hospitals/:hospital_ID",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "hospitals",
+                ":hospital_ID"
+              ],
+              "variable": [
+                {
+                  "key": "hospital_ID",
+                  "value": "{{globals_hospital_ID}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Single Hospital",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.execution.setNextRequest(null);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": "JSON Type",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"BNH\",\r\n  \"address\": \"Changwattana Pakkret\",\r\n  \"district\": \"Pakkret\",\r\n  \"province\": \"Nonthaburi\",\r\n  \"postalcode\": \"10110\",\r\n  \"tel\": \"02-8369999\",\r\n  \"region\": \"กรุงเทพมหานคร (Bangkok)\"\r\n}\r\n"
+            },
+            "url": {
+              "raw": "{{URL}}/api/v1/hospitals/:hospital_ID",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "hospitals",
+                ":hospital_ID"
+              ],
+              "variable": [
+                {
+                  "key": "hospital_ID",
+                  "value": "{{globals_hospital_ID}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "    pm.environment.set(\"TOKEN\",pm.response.json().token)"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": "JSON Type",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Papp kun\",\r\n  \"email\": \"papp@gmail.com\",\r\n  \"password\": \"12345678\",\r\n  \"role\": \"admin\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}/api/v1/auth/register",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "    pm.environment.set(\"TOKEN\",pm.response.json().token)"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": "JSON Type",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\" : \"papp@gmail.com\",\r\n    \"password\" : \"12345678\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}/api/v1/auth/login",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Me",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5OTcxZDVmNDIwMjA5M2YzOWViNzk2NiIsImlhdCI6MTc3MTU1MTQ1NSwiZXhwIjoxNzc0MTQzNDU1fQ.EpvgkxkDolZF-3klXKKXOSK51vAh4XZnxAp2nlYlK9Q",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}/api/v1/auth/me",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.environment.set(\"TOKEN\", null)"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5OTcxZDVmNDIwMjA5M2YzOWViNzk2NiIsImlhdCI6MTc3MTU1MTQ1NSwiZXhwIjoxNzc0MTQzNDU1fQ.EpvgkxkDolZF-3klXKKXOSK51vAh4XZnxAp2nlYlK9Q",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}/api/v1/auth/logout",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "logout"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get logged in User with Token",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5OTcxZDVmNDIwMjA5M2YzOWViNzk2NiIsImlhdCI6MTc3MTU1MTQ1NSwiZXhwIjoxNzc0MTQzNDU1fQ.EpvgkxkDolZF-3klXKKXOSK51vAh4XZnxAp2nlYlK9Q",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}/api/v1/auth/me",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Appointment",
+      "item": [
+        {
+          "name": "Get All Appts",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{URL}}/api/v1/appointments",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "appointments"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Appts for Hospital",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
             "url": {
               "raw": "{{URL}}/api/v1/hospitals",
               "host": [
@@ -77,81 +626,42 @@
             }
           },
           "response": []
-        },
-        {
-          "name": "Get Single Hospital",
-          "protocolProfileBehavior": {
-            "disableBodyPruning": true
-          },
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "description": "JSON Type",
-                "type": "text"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"name\": \"BNH\",\r\n  \"address\": \"Changwattana Pakkret\",\r\n  \"district\": \"Pakkret\",\r\n  \"province\": \"Nonthaburi\",\r\n  \"postalcode\": \"10110\",\r\n  \"tel\": \"02-8369999\",\r\n  \"region\": \"กรุงเทพมหานคร (Bangkok)\"\r\n}\r\n"
-            },
-            "url": {
-              "raw": "{{URL}}/api/v1/hospitals/id",
-              "host": [
-                "{{URL}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "hospitals",
-                "id"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Update Single Hospital",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "description": "JSON Type",
-                "type": "text"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"name\": \"BNH\",\r\n  \"address\": \"Changwattana Pakkret\",\r\n  \"district\": \"Pakkret\",\r\n  \"province\": \"Nonthaburi\",\r\n  \"postalcode\": \"10110\",\r\n  \"tel\": \"02-8369999\",\r\n  \"region\": \"กรุงเทพมหานคร (Bangkok)\"\r\n}\r\n"
-            },
-            "url": {
-              "raw": "{{URL}}/api/v1/hospitals/id",
-              "host": [
-                "{{URL}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "hospitals",
-                "id"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Delete Single Hospital",
-          "request": {
-            "method": "GET",
-            "header": []
-          },
-          "response": []
         }
       ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "URL",
+      "value": "http://pappdomain.us-east-1.elasticbeanstalk.com"
+    },
+    {
+      "key": "TOKEN",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5OWZjZjMwMjUwYWFiYmE3NWE5ZGZjNiIsImlhdCI6MTc3MjE1Nzc5NCwiZXhwIjoxNzc0NzQ5Nzk0fQ.AvprhcZPx3Dwl7Tqj9zuxalfOKAKTEypnW1yoIOM4Kc"
     }
   ]
 }

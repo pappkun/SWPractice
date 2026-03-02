@@ -9,7 +9,14 @@ dotenv.config({ path: './config/config.env' });
 const cookieParser = require('cookie-parser');
 const express = require('express');
 const connectDB = require('./config/db');
-
+const mongoSanitize=require('express-mongo-sanitize');
+const helmet=require('helmet');
+const {xss}=require('express-xss-sanitizer');
+const rateLimit=require('express-rate-limit');
+const hpp=require('hpp');
+const cors=require('cors');
+const swaggerJsDoc = require('swagger-jsdoc');
+const swaggerUI = require('swagger-ui-express');
 
 
 // connect to database
@@ -23,6 +30,33 @@ app.use(express.json());
 
 //Cookie parser
 app.use(cookieParser());
+
+//Sanitize data
+app.use(
+  mongoSanitize({
+    allowDots: true,
+    replaceWith: '_'
+  })
+);
+
+//Set security headers
+app.use(helmet());
+
+//Prevent XSS attacks
+app.use(xss());
+
+//Rate Limiting
+const limiter=rateLimit({
+  windowMs:10*60*1000,//10 mins
+  max: 100
+});
+app.use('/api/v1', limiter);
+
+//Prevent http param pollutions
+app.use(hpp());
+
+//Enable CORS
+app.use(cors());
 
 
 //Route file
@@ -50,3 +84,22 @@ process.on('unhandledRejection', (err, promise) => {
   // Close server & exit process
   server.close(() => process.exit(1));
 });
+
+const swaggerOptions={
+  swaggerDefinition:{
+    openapi: '3.0.0',
+    info: {
+      title: 'Library API',
+      version: '1.0.0',
+      description: 'A simple Express VacQ API'
+    },
+    servers: [
+      {
+        url: 'http://localhost:5000'
+      }
+    ]
+  },
+  apis:['./routes/*.js'],
+};
+const swaggerDocs=swaggerJsDoc(swaggerOptions);
+app.use('/api-docs',swaggerUI.serve, swaggerUI.setup(swaggerDocs));
